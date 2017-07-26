@@ -66,7 +66,6 @@ public class BoardManager : MonoBehaviour {
 		int objectCount = Random.Range (minimum, maximum + 1);
 		for (int i = 0; i < objectCount; i++) {
 			Vector2 randomPosition = RandomPosition ();
-			Debug.Log ("RandomPosition=" + randomPosition);
 			GameObject tileChoice = tileArray [Random.Range (0, tileArray.Length)];
 			Instantiate (tileChoice, randomPosition, Quaternion.identity);
 		}
@@ -78,7 +77,6 @@ public class BoardManager : MonoBehaviour {
 		LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum);
 		LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);
 		int enemyCount = (int)Mathf.Log (level, 2f);
-		Debug.Log ("EnemyCount:" + enemyCount);
 		LayoutObjectAtRandom (enemyTiles, enemyCount, enemyCount);
 		Instantiate (exit, new Vector2 (columns - 1, rows - 1), Quaternion.identity);
 	}
