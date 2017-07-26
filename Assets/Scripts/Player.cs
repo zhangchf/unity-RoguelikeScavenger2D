@@ -40,7 +40,7 @@ public class Player : MovingObject {
 			vertical = 0;
 		}
 		if (horizontal != 0 || vertical != 0) {
-			AttemptMove<Wall> (horizontal, vertical);
+			AttemptMove (horizontal, vertical);
 		}
 	}
 
@@ -50,21 +50,23 @@ public class Player : MovingObject {
 		}
 	}
 
-	protected override void AttemptMove<T> (int xDir, int yDir)
+	protected override void AttemptMove (int xDir, int yDir)
 	{
 		food--;
 		foodText.text = "Food: " + food;
-		base.AttemptMove<T> (xDir, yDir);
+		base.AttemptMove (xDir, yDir);
 
 		CheckIfGameOver ();
 		GameManager.instance.playersTurn = false;
 	}
 
-	protected override void OnCantMove<T> (T component)
+	protected override void OnCantMove (Transform hitTransform)
 	{
-		Wall hitWall = component as Wall;
-		hitWall.takeDamage (wallDamage);
-		animator.SetTrigger ("playerChop");
+		Wall hitWall = hitTransform.GetComponent<Wall> ();
+		if (hitWall != null) {
+			hitWall.takeDamage (wallDamage);
+			animator.SetTrigger ("playerChop");
+		}
 	}
 
 	void OnTriggerEnter2D(Collider2D other) {

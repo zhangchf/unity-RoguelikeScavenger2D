@@ -8,6 +8,7 @@ public class Enemy : MovingObject {
 	private Animator animator;
 	private Transform target;
 	private bool skipMove;
+	private int moveDirection;
 
 	protected override void Start ()
 	{
@@ -17,34 +18,61 @@ public class Enemy : MovingObject {
 		base.Start ();
 	}
 
-	protected override void AttemptMove<T> (int xDir, int yDir)
+	protected override void AttemptMove (int xDir, int yDir)
 	{
 //		if (skipMove) {
 //			skipMove = false;
 //			return;
 //		}
 
-		base.AttemptMove<T> (xDir, yDir);
+		base.AttemptMove (xDir, yDir);
 //		skipMove = true;
 	}
 
-	protected override void OnCantMove<T> (T component)
+	protected override void OnCantMove (Transform hitTransform)
 	{
 		Debug.Log ("Enemy OnCantMove");
-		Player hitPlayer = component as Player;
-		hitPlayer.LoseFood (playerDamage);
-		animator.SetTrigger ("enemyAttack");
+
+		Player hitPlayer = hitTransform.GetComponent<Player> ();
+		if (hitPlayer != null) {
+			hitPlayer.LoseFood (playerDamage);
+			animator.SetTrigger ("enemyAttack");
+		} else {
+			moveDirection++;
+			if (moveDirection > 1) {
+				return;
+			} else {
+				Move (moveDirection);
+			}
+		}
 	}
 
 	public void MoveEnemy() {
+		moveDirection = 0;
+		Move (moveDirection);
+	}
+
+	void Move(int moveDirection) {
+		Vector2 movement = GetMovement (moveDirection);
+		AttemptMove ((int)movement.x, (int)movement.y);
+	}
+
+	Vector2 GetMovement(int moveDirection) {
 		int xDir = 0;
 		int yDir = 0;
-		if (Mathf.Abs (target.position.x - transform.position.x) < float.Epsilon) {
-			yDir = target.position.y > transform.position.y ? 1 : -1;
-		} else {
-			xDir = target.position.x > transform.position.x ? 1 : -1;
+		if (moveDirection == 0) {
+			if (Mathf.Abs (target.position.x - transform.position.x) < float.Epsilon) {
+				yDir = target.position.y > transform.position.y ? 1 : -1;
+			} else {
+				xDir = target.position.x > transform.position.x ? 1 : -1;
+			}
+		} else if (moveDirection == 1) {
+			if (Mathf.Abs (target.position.y - transform.position.y) < float.Epsilon) {
+				xDir = target.position.x > transform.position.x ? 1 : -1;
+			} else {
+				yDir = target.position.y > transform.position.y ? 1 : -1;
+			}
 		}
-		Debug.Log ("EnemyPosition: " + transform.position + ", PlayerPosition: " + target.position + ", movement:" + new Vector2(xDir, yDir));
-		AttemptMove<Player> (xDir, yDir);
+		return new Vector2 (xDir, yDir);
 	}
 }
