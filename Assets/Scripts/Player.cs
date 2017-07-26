@@ -12,6 +12,12 @@ public class Player : MovingObject {
 	public int wallDamage = 1;
 	public Text foodText;
 
+	public AudioClip[] moveClips;
+	public AudioClip[] eatClips;
+	public AudioClip[] drinkClips;
+	public AudioClip[] chopClips;
+	public AudioClip dieClip;
+
 	private Animator animator;
 	private int food;
 
@@ -46,6 +52,8 @@ public class Player : MovingObject {
 
 	void CheckIfGameOver() {
 		if (food <= 0) {
+			SoundManager.instance.PlaySingleSfx (dieClip);
+			SoundManager.instance.musicSource.Stop ();
 			GameManager.instance.GameOver ();
 		}
 	}
@@ -55,6 +63,11 @@ public class Player : MovingObject {
 		food--;
 		foodText.text = "Food: " + food;
 		base.AttemptMove (xDir, yDir);
+
+		RaycastHit2D hit = new RaycastHit2D ();
+		if (CanMove (xDir, yDir, out hit)) {
+			SoundManager.instance.RandomizeSfx (moveClips);
+		}
 
 		CheckIfGameOver ();
 		GameManager.instance.playersTurn = false;
@@ -66,6 +79,7 @@ public class Player : MovingObject {
 		if (hitWall != null) {
 			hitWall.takeDamage (wallDamage);
 			animator.SetTrigger ("playerChop");
+			SoundManager.instance.RandomizeSfx (chopClips);
 		}
 	}
 
@@ -78,10 +92,12 @@ public class Player : MovingObject {
 			food += pointsPerFood;
 			foodText.text = "+" + pointsPerFood + " Food: " + food;
 			other.gameObject.SetActive (false);
+			SoundManager.instance.RandomizeSfx (eatClips);
 		} else if (other.CompareTag ("Soda")) {
 			food += pointsPerSoda;
 			foodText.text = "+" + pointsPerSoda + " Food: " + food;
 			other.gameObject.SetActive (false);
+			SoundManager.instance.RandomizeSfx (drinkClips);
 		}
 	}
 

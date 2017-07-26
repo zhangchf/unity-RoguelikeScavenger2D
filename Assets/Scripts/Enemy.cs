@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy : MovingObject {
+	
 	public int playerDamage = 10;
+	public AudioClip[] enemyAttackClips;
 
 	private Animator animator;
 	private Transform target;
 	private bool skipMove;
 	private int moveDirection;
+
 
 	protected override void Start ()
 	{
@@ -37,6 +40,7 @@ public class Enemy : MovingObject {
 		if (hitPlayer != null) {
 			hitPlayer.LoseFood (playerDamage);
 			animator.SetTrigger ("enemyAttack");
+			SoundManager.instance.RandomizeSfx (enemyAttackClips);
 		} else {
 			moveDirection++;
 			if (moveDirection > 1) {
