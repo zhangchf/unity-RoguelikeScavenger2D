@@ -21,6 +21,8 @@ public class Player : MovingObject {
 	private Animator animator;
 	private int food;
 
+	private Vector2 touchOrigin = -Vector2.one;
+
 	protected override void Start() {
 		animator = GetComponent<Animator> ();
 		food = GameManager.instance.playerFoodPoints;
@@ -40,11 +42,32 @@ public class Player : MovingObject {
 
 		int horizontal = 0;
 		int vertical = 0;
+
+		#if UNITY_STANDALONE
 		horizontal = (int)Input.GetAxisRaw ("Horizontal");
 		vertical = (int)Input.GetAxisRaw ("Vertical");
 		if (horizontal != 0) {
 			vertical = 0;
 		}
+		#else
+		if (Input.touchCount > 0) {
+			Touch touch = Input.touches[0];
+			if (touch.phase == TouchPhase.Began) {
+				touchOrigin = touch.position;
+			} else if (touch.phase == TouchPhase.Ended && touchOrigin.x >= 0) {
+				Vector2 touchEnd = touch.position;
+				float x = touchEnd.x - touchOrigin.x;
+				float y = touchEnd.y - touchOrigin.y;
+				touchOrigin = -Vector2.one;
+				if (Mathf.Abs (x) > Mathf.Abs (y)) {
+					horizontal = x > 0 ? 1 : -1;
+				} else {
+					vertical = y > 0 ? 1 : -1;
+				}
+			}
+		}
+		#endif
+
 		if (horizontal != 0 || vertical != 0) {
 			AttemptMove (horizontal, vertical);
 		}
@@ -64,7 +87,7 @@ public class Player : MovingObject {
 		foodText.text = "Food: " + food;
 		base.AttemptMove (xDir, yDir);
 
-		RaycastHit2D hit = new RaycastHit2D ();
+		RaycastHit2D hit;
 		if (CanMove (xDir, yDir, out hit)) {
 			SoundManager.instance.RandomizeSfx (moveClips);
 		}
